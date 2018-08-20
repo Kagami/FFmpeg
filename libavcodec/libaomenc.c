@@ -68,6 +68,8 @@ typedef struct AOMEncoderContext {
     int static_thresh;
     int drop_threshold;
     int noise_sensitivity;
+    int tile_columns;
+    int tile_rows;
 } AOMContext;
 
 static const char *const ctlidstr[] = {
@@ -75,6 +77,8 @@ static const char *const ctlidstr[] = {
     [AOME_SET_CQ_LEVEL]         = "AOME_SET_CQ_LEVEL",
     [AOME_SET_ENABLEAUTOALTREF] = "AOME_SET_ENABLEAUTOALTREF",
     [AOME_SET_STATIC_THRESHOLD] = "AOME_SET_STATIC_THRESHOLD",
+    [AV1E_SET_TILE_COLUMNS]     = "AV1E_SET_TILE_COLUMNS",
+    [AV1E_SET_TILE_ROWS]        = "AV1E_SET_TILE_ROWS",
     [AV1E_SET_COLOR_RANGE]      = "AV1E_SET_COLOR_RANGE",
     [AV1E_SET_COLOR_PRIMARIES]  = "AV1E_SET_COLOR_PRIMARIES",
     [AV1E_SET_MATRIX_COEFFICIENTS] = "AV1E_SET_MATRIX_COEFFICIENTS",
@@ -449,6 +453,11 @@ static av_cold int aom_init(AVCodecContext *avctx,
     if (ctx->crf >= 0)
         codecctl_int(avctx, AOME_SET_CQ_LEVEL,          ctx->crf);
 
+    if (ctx->tile_columns >= 0)
+        codecctl_int(avctx, AV1E_SET_TILE_COLUMNS, ctx->tile_columns);
+    if (ctx->tile_rows >= 0)
+        codecctl_int(avctx, AV1E_SET_TILE_ROWS, ctx->tile_rows);
+
     codecctl_int(avctx, AV1E_SET_COLOR_PRIMARIES, avctx->color_primaries);
     codecctl_int(avctx, AV1E_SET_MATRIX_COEFFICIENTS, avctx->colorspace);
     codecctl_int(avctx, AV1E_SET_TRANSFER_CHARACTERISTICS, avctx->color_trc);
@@ -746,6 +755,8 @@ static const AVOption options[] = {
     { "static-thresh",    "A change threshold on blocks below which they will be skipped by the encoder", OFFSET(static_thresh), AV_OPT_TYPE_INT, { .i64 = 0 }, 0, INT_MAX, VE },
     { "drop-threshold",   "Frame drop threshold", offsetof(AOMContext, drop_threshold), AV_OPT_TYPE_INT, {.i64 = 0 }, INT_MIN, INT_MAX, VE },
     { "noise-sensitivity", "Noise sensitivity", OFFSET(noise_sensitivity), AV_OPT_TYPE_INT, {.i64 = 0 }, 0, 4, VE},
+    { "tile-columns", "Number of tile columns to use, log2", OFFSET(tile_columns), AV_OPT_TYPE_INT, {.i64 = -1}, -1, 6, VE},
+    { "tile-rows", "Number of tile rows to use, log2", OFFSET(tile_rows), AV_OPT_TYPE_INT, {.i64 = -1}, -1, 6, VE},
     { NULL }
 };
 
